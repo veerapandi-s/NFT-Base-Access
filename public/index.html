@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NFT Based Access</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+        type="application/javascript"></script>
+</head>
+<body>
+  <p>Connected User - <span id="wallet-address"></span></p>
+  <button id="connectWallet">Connect</button>
+  <button id="reveal">Show Content</button>
+  <p>Content message - <span id="secret"></span></p>
+
+  <script type="text/javascript">
+    var account = null;
+    let signer = null;
+    const connect = async () => {
+      if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        account = await signer.getAddress();
+        document.getElementById('wallet-address').textContent = account;
+        document.getElementById('reveal').onclick = revealMsg
+      }
+    }
+
+    const revealMsg = async () => {
+      var signature = await signer.signMessage("Token Id")
+
+
+      var res = await fetch('/getNFTContent?signature=' + signature)
+      var body = await res.text()
+
+      document.getElementById('secret').textContent = body
+    }
+
+    document.getElementById('connectWallet').onclick = connect
+  </script>
+</body>
+</html>
